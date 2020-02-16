@@ -8,21 +8,27 @@
 /* eslint-disable no-undef */
 /* eslint-disable curly */
 
-const URL = 'https://fourtytwowords.herokuapp.com';
-const KEY = 'b972c7ca44dda72a5b482052b1f5e13470e01477f3fb97c85d5313b3c112627073481104fec2fb1a0cc9d84c2212474c0cbe7d8e59d7b95c7cb32a1133f778abd1857bf934ba06647fda4f59e878d164';
-const RANDOM = `${URL}/words/randomWord?api_key=${KEY}`;
-const fetch = require('node-fetch');
-const inquirer = require('inquirer');
+require('dotenv').config();
 const chalk = require('chalk');
 const log = console.log;
+const CONFIG = require('./constants');
+if (!CONFIG.KEY || !CONFIG.URL) {
+    log(chalk.bold.redBright('Missing configuration file. please read readme.md to configure .env file'))
+    process.exit(0);
+}
+const RANDOM = `${CONFIG.URL}/words/randomWord?api_key=${CONFIG.KEY}`;
+const fetch = require('node-fetch');
+const inquirer = require('inquirer');
+
 
 /**
- * get dictionary definitions
+ * get dictionary definitions for `word`
  * @param {string} word
+ * @param {boolean} [noPrint] wether to print to console or not. default value is `false`
  */
 
 async function getWordDefinitions(word, noPrint = false) {
-    let info = await fetch(`${URL}/word/${word}/definitions?api_key=${KEY}`);
+    let info = await fetch(`${CONFIG.URL}/word/${word}/definitions?api_key=${CONFIG.KEY}`);
     const result = await info.json();
     if (!noPrint) {
         log(chalk.redBright.bold('-----------definition(s)------------'));
@@ -34,12 +40,12 @@ async function getWordDefinitions(word, noPrint = false) {
 }
 
 /**
- * get dictionary examples
+ * get dictionary examples for `word`
  * @param {string} word
  */
 
 async function getWordExamples(word) {
-    let info = await fetch(`${URL}/word/${word}/examples?api_key=${KEY}`);
+    let info = await fetch(`${CONFIG.URL}/word/${word}/examples?api_key=${CONFIG.KEY}`);
     const result = await info.json();
     log(chalk.redBright.bold('-----------example(s)------------'));
     const examples = result.examples;
@@ -47,16 +53,16 @@ async function getWordExamples(word) {
     log(chalk.redBright.bold('-----------example(s)------------'));
 }
 
-
 /**
- * get dictionary definitions
+ * get synonyms or antonyms based on the parameter `type`.
  * @param {string} word
- * @param {string} type
+ * @param {string} type It accepts 2 words, `antonym` or `synonym`
+ * @param {boolean} [noPrint] wether to print to console or not. default value is `false`
  */
 
 async function getWordRelatedWords(word, type, noPrint = false) {
     log('')
-    let info = await fetch(`${URL}/word/${word}/relatedWords?api_key=${KEY}`);
+    let info = await fetch(`${CONFIG.URL}/word/${word}/relatedWords?api_key=${CONFIG.KEY}`);
     const data = await info.json();
     let res;
     try {
@@ -66,7 +72,7 @@ async function getWordRelatedWords(word, type, noPrint = false) {
     }
     if (res) {
         if (!noPrint) {
-            log(chalk.redBright.bold(`------antonym-----${type}s------------`));
+            log(chalk.redBright.bold(`-----------${type}s------------`));
             for (let index in res) log(chalk.greenBright(`(${parseInt(index) + 1})\t ${res[index]}\n`))
             log(chalk.redBright.bold(`-----------${type}s------------`));
         }
@@ -78,22 +84,31 @@ async function getWordRelatedWords(word, type, noPrint = false) {
     return false;
 }
 
+/**
+ * get random word from dictionary
+ * @param {boolean} [noPrint] wether to print to console or not. default value is `false`
+ */
+
 async function getRandomWord(noPrint = false) {
     let info = await fetch(RANDOM);
-    const result = await info.json();
-    if (!noPrint) log(chalk.yellowBright(`Random word of this request: ${result.word}`))
-    const definition = await getWordDefinitions(result.word, noPrint);
-    if (!noPrint) await getWordExamples(result.word);
-    const synonym = await getWordRelatedWords(result.word, 'synonym', noPrint);
-    const antonym = await getWordRelatedWords(result.word, 'antonym', noPrint);
+    const { word } = await info.json();
+    if (!noPrint) log(chalk.yellowBright(`Random word of this request: ${word}`))
+    const definition = await getWordDefinitions(word, noPrint);
+    if (!noPrint) await getWordExamples(word);
+    const synonym = await getWordRelatedWords(word, 'synonym', noPrint);
+    const antonym = await getWordRelatedWords(word, 'antonym', noPrint);
 
     return {
-        'word': result.word,
+        word,
         definition,
         synonym,
         antonym
     };
 }
+
+/**
+ * launch the game if user selects **yes**
+ */
 
 async function launchGame() {
     const { word, definition, synonym, antonym } = await getRandomWord(true);
@@ -116,9 +131,12 @@ async function launchGame() {
     if (answer !== synonym[0] && synonym.indexOf(answer) > -1) {
         log(chalk.magenta.bold(`You won this round!!... The word is ${word}`));
     }
-
-
 }
+
+/**
+ * main function to invoke dictionary
+ */
+
 async function dict() {
     let option = '';
     let word = '';
@@ -157,12 +175,17 @@ async function dict() {
                 }
             ]);
             if (answer.game === true) await launchGame();
+        } else {
+            await getWordDefinitions(word);
+            await getWordExamples(word);
+            await getWordRelatedWords(word, 'synonym');
+            await getWordRelatedWords(word, 'antonym');
         }
     } else {
         await getRandomWord();
     }
     console.log('option is:> ', option, ' ||word is:> ', word);
 }
-
+// starting point
 dict();
 

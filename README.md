@@ -12,6 +12,9 @@ npm i
 
 ## Usage
 
+### Important 
+Rename `sample-env` file to `.env` and  add valid `KEY` and `URL` in that file
+
 To find definitions for a word
 ```
 dict defn <word>
@@ -27,10 +30,14 @@ To find synonyms for a word
 dict syn <word>
 ```
 
-
 To find antonyms for a word
 ```
 dict ant <word>
+```
+
+To find definitions, synonyms, antonyms and examples for a word
+```
+dict <word>
 ```
 
 To find definitions, synonyms, antonyms for a random word
