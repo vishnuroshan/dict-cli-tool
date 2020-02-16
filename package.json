@@ -1,6 +1,6 @@
 {
   "name": "dict",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "dictionary cli tool",
   "main": "index.js",
   "bin": "./index.js",
