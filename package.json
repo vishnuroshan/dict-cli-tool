@@ -1,0 +1,27 @@
+{
+  "name": "dict",
+  "version": "1.0.0",
+  "description": "dictionary cli tool",
+  "main": "index.js",
+  "bin": "./index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vishnuroshan/dict-cli-tool.git"
+  },
+  "keywords": [
+    "dictionary",
+    "cli",
+    "42words"
+  ],
+  "author": "vishnu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vishnuroshan/dict-cli-tool/issues"
+  },
+  "homepage": "https://github.com/vishnuroshan/dict-cli-tool#readme"
+}
