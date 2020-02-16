@@ -72,9 +72,9 @@ async function getWordRelatedWords(word, type, noPrint = false) {
     }
     if (res) {
         if (!noPrint) {
-            log(chalk.redBright.bold(`-----------${type}s------------`));
+            log(chalk.redBright.bold(`-----------${type}(s)------------`));
             for (let index in res) log(chalk.greenBright(`(${parseInt(index) + 1})\t ${res[index]}\n`))
-            log(chalk.redBright.bold(`-----------${type}s------------`));
+            log(chalk.redBright.bold(`-----------${type}(s)------------`));
         }
 
         return res;
@@ -107,6 +107,32 @@ async function getRandomWord(noPrint = false) {
 }
 
 /**
+ * prompt answers recursively (3 retrys) until right answer is given
+ */
+
+async function promptForAnswer(synonym, word, count = 3) {
+    if (count >= 1) {
+        const { answer } = await inquirer.prompt([
+            {
+                'type': 'input',
+                'name': 'answer',
+                'message': 'Guess the word??',
+                'default': ''
+            }
+        ]);
+        // eslint-disable-next-line no-mixed-operators
+        if (answer && answer !== synonym[0] && synonym.indexOf(answer) > -1 || answer === word) {
+            log(chalk.magenta.bold(`You won this round!!... The word is ${word}`));
+            process.exit(0);
+        } else {
+            await promptForAnswer(synonym, word, count - 1);
+        }
+    }
+    log('You lost!. Better luck next time!!...');
+    process.exit(0);
+}
+
+/**
  * launch the game if user selects **yes**
  */
 
@@ -120,17 +146,8 @@ async function launchGame() {
         chalk.redBright.bold('Antonym: '),
         antonym ? chalk.blueBright(`\n${antonym[0]}\n\n`) : '**no antonyms found**'
     );
-    const { answer } = await inquirer.prompt([
-        {
-            'type': 'input',
-            'name': 'answer',
-            'message': 'Guess the word??',
-            'default': ''
-        }
-    ]);
-    if (answer !== synonym[0] && synonym.indexOf(answer) > -1) {
-        log(chalk.magenta.bold(`You won this round!!... The word is ${word}`));
-    }
+    log(word);
+    await promptForAnswer(synonym, word);
 }
 
 /**
