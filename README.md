@@ -10,10 +10,16 @@ To install dependencies,
 npm i
 ```
 
+```
+sudo npm link
+```
+
+**IMPORTANT** 
+Rename `sample-env` file to `.env` and  add valid `KEY` and `URL` values in it
+
+
 ## Usage
 
-### Important 
-Rename `sample-env` file to `.env` and  add valid `KEY` and `URL` in that file
 
 To find definitions for a word
 ```
